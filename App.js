@@ -38,21 +38,18 @@ const App = () => {
       let offer = null;
       if (!offer) {
         offer = payload;
-        console.log('onOffer');
         handelClientOffer(payload);
       }
     });
     Socket.current.on('ice_candidate', payload => {
-      console.log('onIce_candidate');
       handelClientIceCandidate(payload);
     });
     Socket.current.on('answer', payload => {
-      console.log('answer');
       handelClientAnswer(payload);
     });
     Socket.current.on('close', payload => {
-      myPeer.current.close();
-      myPeer.current = null;
+      myPeer.current && myPeer.current.close();
+      myPeer.current && (myPeer.current = null);
       setClientStream(null);
     });
   }, []);
@@ -176,19 +173,23 @@ const App = () => {
   return (
     <View style={styles.container}>
       {stream && (
-        <RTCView
-          mirror
-          streamURL={stream.toURL()}
-          style={styles.myVideo}
-          objectFit="cover"
-        />
+        <View style={styles.MyVideoWarper}>
+          <RTCView
+            mirror
+            streamURL={stream.toURL()}
+            style={styles.myVideo}
+            objectFit="cover"
+          />
+        </View>
       )}
-      {ClientStream && (
+      {ClientStream ? (
         <RTCView
           streamURL={ClientStream.toURL()}
           style={styles.clientVideo}
           objectFit="contain"
         />
+      ) : (
+        <Text style={styles.whiteText}>No one is hear</Text>
       )}
       <View style={styles.btnWarper}>
         <TouchableOpacity style={styles.btn} onPress={callPeer}>
@@ -197,8 +198,6 @@ const App = () => {
         <TouchableOpacity style={styles.Endbtn} onPress={callEnd}>
           <Text>End</Text>
         </TouchableOpacity>
-
-        {/* <Button style={styles.btn} color="red" title="Call" onPress={callEnd} /> */}
       </View>
     </View>
   );
@@ -215,17 +214,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'black',
   },
-  myVideo: {
+  MyVideoWarper: {
     width: Dimensions.get('window').width / 3,
     height: Dimensions.get('window').height / 4,
     position: 'absolute',
     bottom: 50,
     right: 0,
     zIndex: 11,
+    margin: 10,
+    overflow: 'hidden',
+  },
+  myVideo: {
+    width: '100%',
+    height: '100%',
   },
   clientVideo: {
     width: '100%',
-    height: 1000,
+    height: '100%',
   },
   btnWarper: {
     flexDirection: 'row',
@@ -244,5 +249,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'red',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  whiteText: {
+    color: 'white',
   },
 });
