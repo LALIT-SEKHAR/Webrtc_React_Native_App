@@ -55,7 +55,6 @@ const App = () => {
   }, []);
 
   const start = async () => {
-    console.log('start');
     if (!stream) {
       let s;
       const isFront = true;
@@ -71,7 +70,6 @@ const App = () => {
     }
   };
   const stop = () => {
-    console.log('stop');
     if (stream) {
       stream.release();
       setStream(null);
@@ -82,12 +80,9 @@ const App = () => {
     myPeer.current = createPeer();
     addMediaTracks(myPeer.current);
     myPeer.current.onicecandidate = e => {
-      console.log('sendIce_candidate');
       Socket.current.emit('ice_candidate', JSON.stringify(e.candidate));
     };
     myPeer.current.onaddstream = e => {
-      console.log('got Track');
-      console.log(e.stream);
       setClientStream(e.stream);
     };
     myPeer.current.setRemoteDescription(JSON.parse(offer)).then(e => {});
@@ -99,7 +94,6 @@ const App = () => {
           'answer',
           JSON.stringify(myPeer.current.localDescription),
         );
-        console.log('send Answer');
       })
       .catch(error =>
         console.error({message: 'WebRTC localDescription error', error}),
@@ -121,19 +115,15 @@ const App = () => {
 
   const handelClientIceCandidate = Ice_candidate => {
     if (JSON.parse(Ice_candidate).candidate) {
-      console.log('candidate: ', JSON.parse(Ice_candidate).candidate);
       myPeer.current
         .addIceCandidate(new RTCIceCandidate(JSON.parse(Ice_candidate)))
-        .then(data => console.log(data))
+        .then()
         .catch(error => console.log('ERROR Ice_candidate: ', error.message));
     }
   };
 
   const addMediaTracks = async peer => {
     peer.addStream(myMediaStream.current);
-    // await myMediaStream.current
-    //   .getTracks()
-    //   .forEach(track => peer.addStream(track, myMediaStream.current));
   };
 
   const createOffer = peer => {
@@ -151,12 +141,9 @@ const App = () => {
     myPeer.current = createPeer();
     addMediaTracks(myPeer.current);
     myPeer.current.onicecandidate = e => {
-      console.log('sendIce_candidate');
       Socket.current.emit('ice_candidate', JSON.stringify(e.candidate));
     };
     myPeer.current.onaddstream = e => {
-      console.log('got Track');
-      console.log(e.stream);
       setClientStream(e.stream);
     };
     createOffer(myPeer.current);
